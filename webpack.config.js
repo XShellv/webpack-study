@@ -1,7 +1,52 @@
+var HtmlwebpackPlugin = require('html-webpack-plugin');
+var webpack = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+var devFlagPlugin = new webpack.DefinePlugin({
+    __DEV__: JSON.stringify(JSON.parse(process.env.DEBUG || 'false'))
+});
+
+let plugins = [
+    new HtmlwebpackPlugin({
+        title: "webpack-demo",
+        template: 'index.html'
+    }),
+    // new webpack.ProvidePlugin({
+    //     $: 'jquery',
+    //     jQuery: 'jquery'
+    // }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //     name: 'vendor',
+    //     filename: 'vendor.js'
+    // }),
+    devFlagPlugin
+]
+process.env.NODE_ENV === "prod" && plugins.push(new BundleAnalyzerPlugin())
+
 module.exports = {
-    entry: "./main.js",
+    entry: {
+        a: "./main1.js",
+        b: "./main2.js",
+        // vendor: ['jquery'],
+    },
     output: {
-        filename: "bundle.js"
+        filename: "[name].bundle.js"
+    },
+    plugins,
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    name: "commons",
+                    chunks: "initial",
+                    minChunks: 2
+                },
+                // vendor: {
+                //     name: "vendor",
+                //     chunks: "initial",
+                // }
+            }
+        }
     },
     module: {
         rules: [
@@ -41,5 +86,8 @@ module.exports = {
                 }
             },
         ]
+    },
+    externals:{
+        jquery: 'jQuery'
     }
 }
